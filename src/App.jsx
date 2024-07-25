@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import TodoInput from "./component/TodoInput"
 import TodoList from "./component/TodoList"
 
@@ -12,8 +12,13 @@ function App() {
   /* reinstantialising state */
   const [todoValue, setTodoValue] = useState('')
 
+  function persistData(newList) {
+    localStorage.setItem('todos', JSON.stringify({ todos: newList }))
+  }
+
   function handleAddTodos(newTodo) {
     const newTodoList = [...todos, newTodo]
+    persistData(newTodoList)
     setTodos(newTodoList)
   }
 
@@ -23,6 +28,7 @@ function App() {
       return todoIndex !== index
     })
 
+    persistData(newTodoList)
     setTodos(newTodoList)
   }
 
@@ -31,6 +37,25 @@ function App() {
     setTodoValue(valueToBeEdited)
     handleDeleteTodo(index)
   }
+
+  /* listen to diff event and run code based on when the event happen */
+  /* => {} = arrow function [] = dependency array*/
+  useEffect(() => {
+    /* if local storage doesnt exist*/
+    if (!localStorage){
+      return
+    } 
+
+
+    let localTodos = localStorage.getItem('todos')
+    if (!localTodos){ /* if doesnt exist before */
+      return
+    }
+
+    localTodos = JSON.parse(localTodos).todos
+    setTodos(localTodos)
+
+  }, [])
 
   return (
     <>
